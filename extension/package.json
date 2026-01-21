@@ -1,0 +1,39 @@
+{
+  "name": "ai-code-helper",
+  "displayName": "AI Code Helper",
+  "description": "Help to analyze Python code",
+  "version": "0.0.1",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:ai-code-helper.chat"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ai-code-helper.chat",
+        "title": "AI Code Helper: Open Chat"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "lint": "eslint src",
+    "check-types": "tsc --noEmit",
+    "package": "node esbuild.js --production"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.108.1",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.2",
+    "esbuild": "^0.27.2"
+  }
+}

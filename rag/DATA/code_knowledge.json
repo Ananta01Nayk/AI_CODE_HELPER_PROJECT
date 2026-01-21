@@ -1,0 +1,173 @@
+{
+  "functions": {
+    "setUpClass": {
+      "name": "setUpClass",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 23,
+      "end": 25,
+      "code": "\tdef setUpClass(cls):\n\t\tsuper().setUpClass()\n\t\tmake_test_objects(\"Address\", ADDRESS_RECORDS)",
+      "called_by": [
+        "setUpClass"
+      ]
+    },
+    "tearDownClass": {
+      "name": "tearDownClass",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 28,
+      "end": 29,
+      "code": "\tdef tearDownClass(cls):\n\t\tfrappe.db.rollback()",
+      "called_by": []
+    },
+    "test_get_party_shipping_address": {
+      "name": "test_get_party_shipping_address",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 31,
+      "end": 33,
+      "code": "\tdef test_get_party_shipping_address(self):\n\t\taddress = get_party_shipping_address(\"Customer\", \"_Test Customer 1\")\n\t\tself.assertEqual(address, \"_Test Billing Address 2 Title-Billing\")",
+      "called_by": []
+    },
+    "test_get_party_shipping_address2": {
+      "name": "test_get_party_shipping_address2",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 35,
+      "end": 37,
+      "code": "\tdef test_get_party_shipping_address2(self):\n\t\taddress = get_party_shipping_address(\"Customer\", \"_Test Customer 2\")\n\t\tself.assertEqual(address, \"_Test Shipping Address 2 Title-Shipping\")",
+      "called_by": []
+    },
+    "test_get_voucher_wise_gl_entry": {
+      "name": "test_get_voucher_wise_gl_entry",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 39,
+      "end": 62,
+      "code": "\tdef test_get_voucher_wise_gl_entry(self):\n\t\tpr = make_purchase_receipt(\n\t\t\titem_code=\"_Test Item\",\n\t\t\tposting_date=\"2021-02-01\",\n\t\t\trate=100,\n\t\t\tqty=1,\n\t\t\twarehouse=\"Stores - TCP1\",\n\t\t\tcompany=\"_Test Company with perpetual inventory\",\n\t\t)\n\n\t\tfuture_vouchers = get_future_stock_vouchers(\"2021-01-01\", \"00:00:00\", for_items=[\"_Test Item\"])\n\n\t\tvoucher_type_and_no = (\"Purchase Receipt\", pr.name)\n\t\tself.assertTrue(\n\t\t\tvoucher_type_and_no in future_vouchers,\n\t\t\tmsg=\"get_future_stock_vouchers not returning correct value\",\n\t\t)\n\n\t\tposting_date = \"2021-01-01\"\n\t\tgl_entries = get_voucherwise_gl_entries(future_vouchers, posting_date)\n\t\tself.assertTrue(\n\t\t\tvoucher_type_and_no in gl_entries,\n\t\t\tmsg=\"get_voucherwise_gl_entries not returning expected GLes\",\n\t\t)",
+      "called_by": []
+    },
+    "test_stock_voucher_sorting": {
+      "name": "test_stock_voucher_sorting",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 64,
+      "end": 81,
+      "code": "\tdef test_stock_voucher_sorting(self):\n\t\tvouchers = []\n\n\t\titem = make_item().name\n\n\t\tstock_entry = {\"item\": item, \"to_warehouse\": \"_Test Warehouse - _TC\", \"qty\": 1, \"rate\": 10}\n\n\t\tse1 = make_stock_entry(posting_date=\"2022-01-01\", **stock_entry)\n\t\tse3 = make_stock_entry(posting_date=\"2022-03-01\", **stock_entry)\n\t\tse2 = make_stock_entry(posting_date=\"2022-02-01\", **stock_entry)\n\n\t\tfor doc in (se1, se2, se3):\n\t\t\tvouchers.append((doc.doctype, doc.name))\n\n\t\tvouchers.append((\"Stock Entry\", \"Wat\"))\n\n\t\tsorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))\n\t\tself.assertEqual(sorted_vouchers, vouchers)",
+      "called_by": []
+    },
+    "test_update_reference_in_payment_entry": {
+      "name": "test_update_reference_in_payment_entry",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 83,
+      "end": 131,
+      "code": "\tdef test_update_reference_in_payment_entry(self):\n\t\titem = make_item().name\n\n\t\tpurchase_invoice = make_purchase_invoice(\n\t\t\titem=item, supplier=\"_Test Supplier USD\", currency=\"USD\", conversion_rate=82.32, do_not_submit=1\n\t\t)\n\t\tpurchase_invoice.credit_to = \"_Test Payable USD - _TC\"\n\t\tpurchase_invoice.submit()\n\n\t\tpayment_entry = get_payment_entry(purchase_invoice.doctype, purchase_invoice.name)\n\t\tpayment_entry.paid_amount = 15725\n\t\tpayment_entry.deductions = []\n\t\tpayment_entry.save()\n\n\t\t# below is the difference between base_paid_amount and base_received_amount (exchange gain)\n\t\tself.assertEqual(payment_entry.deductions[0].amount, -4855.0)\n\n\t\tpayment_entry.target_exchange_rate = 62.9\n\t\tpayment_entry.save()\n\n\t\t# after changing the exchange rate, there is no exchange gain / loss\n\t\tself.assertEqual(payment_entry.deductions, [])\n\n\t\tpayment_entry.references = []\n\t\tself.assertEqual(payment_entry.difference_amount, 0.0)\n\t\tpayment_entry.submit()\n\n\t\tpayment_reconciliation = frappe.new_doc(\"Payment Reconciliation\")\n\t\tpayment_reconciliation.company = payment_entry.company\n\t\tpayment_reconciliation.party_type = \"Supplier\"\n\t\tpayment_reconciliation.party = purchase_invoice.supplier\n\t\tpayment_reconciliation.receivable_payable_account = payment_entry.paid_to\n\t\tpayment_reconciliation.get_unreconciled_entries()\n\t\tpayment_reconciliation.allocate_entries(\n\t\t\t{\n\t\t\t\t\"payments\": [d.__dict__ for d in payment_reconciliation.payments],\n\t\t\t\t\"invoices\": [d.__dict__ for d in payment_reconciliation.invoices],\n\t\t\t}\n\t\t)\n\t\tfor d in payment_reconciliation.invoices:\n\t\t\t# Reset invoice outstanding_amount because allocate_entries will zero this value out.\n\t\t\td.outstanding_amount = d.amount\n\t\tfor d in payment_reconciliation.allocation:\n\t\t\td.difference_account = \"Exchange Gain/Loss - _TC\"\n\t\tpayment_reconciliation.reconcile()\n\n\t\tpayment_entry.load_from_db()\n\t\tself.assertEqual(len(payment_entry.references), 1)\n\t\tself.assertEqual(payment_entry.difference_amount, 0)",
+      "called_by": []
+    },
+    "test_naming_series_variable_parsing": {
+      "name": "test_naming_series_variable_parsing",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 133,
+      "end": 159,
+      "code": "\tdef test_naming_series_variable_parsing(self):\n\t\t\"\"\"\n\t\tTests parsing utility used by Naming Series Variable hook for FY\n\t\t\"\"\"\n\t\tfrom frappe.custom.doctype.property_setter.property_setter import make_property_setter\n\t\tfrom frappe.utils import nowdate\n\n\t\tfrom erpnext.accounts.utils import get_fiscal_year\n\t\tfrom erpnext.buying.doctype.supplier.test_supplier import create_supplier\n\n\t\t# Configure Supplier Naming in Buying Settings\n\t\tfrappe.db.set_default(\"supp_master_name\", \"Auto Name\")\n\n\t\t# Configure Autoname in Supplier DocType\n\t\tmake_property_setter(\"Supplier\", None, \"naming_rule\", \"Expression\", \"Data\", for_doctype=\"Doctype\")\n\t\tmake_property_setter(\"Supplier\", None, \"autoname\", \"SUP-.FY.-.#####\", \"Data\", for_doctype=\"Doctype\")\n\n\t\tfiscal_year = get_fiscal_year(nowdate())[0]\n\n\t\t# Create Supplier\n\t\tsupplier = create_supplier()\n\n\t\t# Check Naming Series in generated Supplier ID\n\t\tdoc_name = supplier.name.split(\"-\")\n\t\tself.assertEqual(len(doc_name), 3)\n\t\tself.assertSequenceEqual(doc_name[0:2], (\"SUP\", fiscal_year))\n\t\tfrappe.db.set_default(\"supp_master_name\", \"Supplier Name\")",
+      "called_by": []
+    },
+    "test_get_zero_cutoff": {
+      "name": "test_get_zero_cutoff",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 161,
+      "end": 164,
+      "code": "\tdef test_get_zero_cutoff(self):\n\t\tself.assertEqual(get_zero_cutoff(None), 0.005)\n\t\tself.assertEqual(get_zero_cutoff(\"EUR\"), 0.005)\n\t\tself.assertEqual(get_zero_cutoff(\"BHD\"), 0.0005)",
+      "called_by": []
+    }
+  },
+  "classes": {
+    "TestUtils": {
+      "name": "TestUtils",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py",
+      "start": 21,
+      "end": 164,
+      "code": "class TestUtils(IntegrationTestCase):\n\t@classmethod\n\tdef setUpClass(cls):\n\t\tsuper().setUpClass()\n\t\tmake_test_objects(\"Address\", ADDRESS_RECORDS)\n\n\t@classmethod\n\tdef tearDownClass(cls):\n\t\tfrappe.db.rollback()\n\n\tdef test_get_party_shipping_address(self):\n\t\taddress = get_party_shipping_address(\"Customer\", \"_Test Customer 1\")\n\t\tself.assertEqual(address, \"_Test Billing Address 2 Title-Billing\")\n\n\tdef test_get_party_shipping_address2(self):\n\t\taddress = get_party_shipping_address(\"Customer\", \"_Test Customer 2\")\n\t\tself.assertEqual(address, \"_Test Shipping Address 2 Title-Shipping\")\n\n\tdef test_get_voucher_wise_gl_entry(self):\n\t\tpr = make_purchase_receipt(\n\t\t\titem_code=\"_Test Item\",\n\t\t\tposting_date=\"2021-02-01\",\n\t\t\trate=100,\n\t\t\tqty=1,\n\t\t\twarehouse=\"Stores - TCP1\",\n\t\t\tcompany=\"_Test Company with perpetual inventory\",\n\t\t)\n\n\t\tfuture_vouchers = get_future_stock_vouchers(\"2021-01-01\", \"00:00:00\", for_items=[\"_Test Item\"])\n\n\t\tvoucher_type_and_no = (\"Purchase Receipt\", pr.name)\n\t\tself.assertTrue(\n\t\t\tvoucher_type_and_no in future_vouchers,\n\t\t\tmsg=\"get_future_stock_vouchers not returning correct value\",\n\t\t)\n\n\t\tposting_date = \"2021-01-01\"\n\t\tgl_entries = get_voucherwise_gl_entries(future_vouchers, posting_date)\n\t\tself.assertTrue(\n\t\t\tvoucher_type_and_no in gl_entries,\n\t\t\tmsg=\"get_voucherwise_gl_entries not returning expected GLes\",\n\t\t)\n\n\tdef test_stock_voucher_sorting(self):\n\t\tvouchers = []\n\n\t\titem = make_item().name\n\n\t\tstock_entry = {\"item\": item, \"to_warehouse\": \"_Test Warehouse - _TC\", \"qty\": 1, \"rate\": 10}\n\n\t\tse1 = make_stock_entry(posting_date=\"2022-01-01\", **stock_entry)\n\t\tse3 = make_stock_entry(posting_date=\"2022-03-01\", **stock_entry)\n\t\tse2 = make_stock_entry(posting_date=\"2022-02-01\", **stock_entry)\n\n\t\tfor doc in (se1, se2, se3):\n\t\t\tvouchers.append((doc.doctype, doc.name))\n\n\t\tvouchers.append((\"Stock Entry\", \"Wat\"))\n\n\t\tsorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))\n\t\tself.assertEqual(sorted_vouchers, vouchers)\n\n\tdef test_update_reference_in_payment_entry(self):\n\t\titem = make_item().name\n\n\t\tpurchase_invoice = make_purchase_invoice(\n\t\t\titem=item, supplier=\"_Test Supplier USD\", currency=\"USD\", conversion_rate=82.32, do_not_submit=1\n\t\t)\n\t\tpurchase_invoice.credit_to = \"_Test Payable USD - _TC\"\n\t\tpurchase_invoice.submit()\n\n\t\tpayment_entry = get_payment_entry(purchase_invoice.doctype, purchase_invoice.name)\n\t\tpayment_entry.paid_amount = 15725\n\t\tpayment_entry.deductions = []\n\t\tpayment_entry.save()\n\n\t\t# below is the difference between base_paid_amount and base_received_amount (exchange gain)\n\t\tself.assertEqual(payment_entry.deductions[0].amount, -4855.0)\n\n\t\tpayment_entry.target_exchange_rate = 62.9\n\t\tpayment_entry.save()\n\n\t\t# after changing the exchange rate, there is no exchange gain / loss\n\t\tself.assertEqual(payment_entry.deductions, [])\n\n\t\tpayment_entry.references = []\n\t\tself.assertEqual(payment_entry.difference_amount, 0.0)\n\t\tpayment_entry.submit()\n\n\t\tpayment_reconciliation = frappe.new_doc(\"Payment Reconciliation\")\n\t\tpayment_reconciliation.company = payment_entry.company\n\t\tpayment_reconciliation.party_type = \"Supplier\"\n\t\tpayment_reconciliation.party = purchase_invoice.supplier\n\t\tpayment_reconciliation.receivable_payable_account = payment_entry.paid_to\n\t\tpayment_reconciliation.get_unreconciled_entries()\n\t\tpayment_reconciliation.allocate_entries(\n\t\t\t{\n\t\t\t\t\"payments\": [d.__dict__ for d in payment_reconciliation.payments],\n\t\t\t\t\"invoices\": [d.__dict__ for d in payment_reconciliation.invoices],\n\t\t\t}\n\t\t)\n\t\tfor d in payment_reconciliation.invoices:\n\t\t\t# Reset invoice outstanding_amount because allocate_entries will zero this value out.\n\t\t\td.outstanding_amount = d.amount\n\t\tfor d in payment_reconciliation.allocation:\n\t\t\td.difference_account = \"Exchange Gain/Loss - _TC\"\n\t\tpayment_reconciliation.reconcile()\n\n\t\tpayment_entry.load_from_db()\n\t\tself.assertEqual(len(payment_entry.references), 1)\n\t\tself.assertEqual(payment_entry.difference_amount, 0)\n\n\tdef test_naming_series_variable_parsing(self):\n\t\t\"\"\"\n\t\tTests parsing utility used by Naming Series Variable hook for FY\n\t\t\"\"\"\n\t\tfrom frappe.custom.doctype.property_setter.property_setter import make_property_setter\n\t\tfrom frappe.utils import nowdate\n\n\t\tfrom erpnext.accounts.utils import get_fiscal_year\n\t\tfrom erpnext.buying.doctype.supplier.test_supplier import create_supplier\n\n\t\t# Configure Supplier Naming in Buying Settings\n\t\tfrappe.db.set_default(\"supp_master_name\", \"Auto Name\")\n\n\t\t# Configure Autoname in Supplier DocType\n\t\tmake_property_setter(\"Supplier\", None, \"naming_rule\", \"Expression\", \"Data\", for_doctype=\"Doctype\")\n\t\tmake_property_setter(\"Supplier\", None, \"autoname\", \"SUP-.FY.-.#####\", \"Data\", for_doctype=\"Doctype\")\n\n\t\tfiscal_year = get_fiscal_year(nowdate())[0]\n\n\t\t# Create Supplier\n\t\tsupplier = create_supplier()\n\n\t\t# Check Naming Series in generated Supplier ID\n\t\tdoc_name = supplier.name.split(\"-\")\n\t\tself.assertEqual(len(doc_name), 3)\n\t\tself.assertSequenceEqual(doc_name[0:2], (\"SUP\", fiscal_year))\n\t\tfrappe.db.set_default(\"supp_master_name\", \"Supplier Name\")\n\n\tdef test_get_zero_cutoff(self):\n\t\tself.assertEqual(get_zero_cutoff(None), 0.005)\n\t\tself.assertEqual(get_zero_cutoff(\"EUR\"), 0.005)\n\t\tself.assertEqual(get_zero_cutoff(\"BHD\"), 0.0005)"
+    }
+  },
+  "calls": {
+    "setUpClass": [
+      "setUpClass",
+      "super",
+      "make_test_objects"
+    ],
+    "tearDownClass": [
+      "rollback"
+    ],
+    "test_get_party_shipping_address": [
+      "get_party_shipping_address",
+      "assertEqual"
+    ],
+    "test_get_party_shipping_address2": [
+      "get_party_shipping_address",
+      "assertEqual"
+    ],
+    "test_get_voucher_wise_gl_entry": [
+      "make_purchase_receipt",
+      "get_future_stock_vouchers",
+      "assertTrue",
+      "get_voucherwise_gl_entries",
+      "assertTrue"
+    ],
+    "test_stock_voucher_sorting": [
+      "make_item",
+      "make_stock_entry",
+      "make_stock_entry",
+      "make_stock_entry",
+      "append",
+      "append",
+      "sort_stock_vouchers_by_posting_date",
+      "list",
+      "reversed",
+      "assertEqual"
+    ],
+    "test_update_reference_in_payment_entry": [
+      "make_item",
+      "make_purchase_invoice",
+      "submit",
+      "get_payment_entry",
+      "save",
+      "assertEqual",
+      "save",
+      "assertEqual",
+      "assertEqual",
+      "submit",
+      "new_doc",
+      "get_unreconciled_entries",
+      "allocate_entries",
+      "reconcile",
+      "load_from_db",
+      "assertEqual",
+      "len",
+      "assertEqual"
+    ],
+    "test_naming_series_variable_parsing": [
+      "set_default",
+      "make_property_setter",
+      "make_property_setter",
+      "get_fiscal_year",
+      "nowdate",
+      "create_supplier",
+      "split",
+      "assertEqual",
+      "len",
+      "assertSequenceEqual",
+      "set_default"
+    ],
+    "test_get_zero_cutoff": [
+      "assertEqual",
+      "get_zero_cutoff",
+      "assertEqual",
+      "get_zero_cutoff",
+      "assertEqual",
+      "get_zero_cutoff"
+    ]
+  },
+  "syntax_errors": [],
+  "logical_bugs": [
+    {
+      "type": "UnusedVariable",
+      "name": "cls",
+      "file": "d:\\ananta\\AI_engineer_Intership\\main_project\\erpnext\\erpnext\\accounts\\test\\test_utils.py"
+    }
+  ]
+}
